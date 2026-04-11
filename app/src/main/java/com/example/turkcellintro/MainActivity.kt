@@ -122,5 +122,4 @@ fun Sayac() {
         Text("Tıkla")
     }
 }
-//
 // Recomposition => Ekranın ilgili kısmının tekrar çalıştırılmasına kabaca recomposition denir.
