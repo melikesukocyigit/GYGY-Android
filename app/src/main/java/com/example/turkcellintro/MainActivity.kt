@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,11 +27,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController;
 
 // Burada ekran tanımlarını yap.
 sealed class Screen(val route: String) {
     data object Register: Screen("register")
+    data object Homepage: Screen("homepage")
 }
 
 class MainActivity : ComponentActivity() {
@@ -48,10 +52,18 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MyNavigatableApp(modifier: Modifier) {
     val navController = rememberNavController()
+    // Magic String
+    Column() {
+        NavHost(navController=navController, startDestination = Screen.Register.route){
+            composable(Screen.Register.route) { RegisterScreen(modifier, navController) }
+            composable(Screen.Homepage.route) { Homepage(modifier) }
+        }
+    }
+
 }
 
 @Composable
-fun MyAppStart(modifier: Modifier)
+fun Homepage(modifier: Modifier)
 {
     // State'i tanımla ki..
     // ikisi de burayı okuyabilsin-değiştirebilsin..
