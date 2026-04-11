@@ -26,7 +26,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.rememberNavController;
 
+// Burada ekran tanımlarını yap.
+sealed class Screen(val route: String) {
+    data object Register: Screen("register")
+}
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,10 +39,15 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Scaffold {
-                    paddingValues ->  MyAppStart(Modifier.padding(paddingValues))
+                    paddingValues ->  MyNavigatableApp(Modifier.padding(paddingValues))
             }
         }
     }
+}
+
+@Composable
+fun MyNavigatableApp(modifier: Modifier) {
+    val navController = rememberNavController()
 }
 
 @Composable
@@ -49,7 +59,8 @@ fun MyAppStart(modifier: Modifier)
 
 
     Column(modifier = modifier.fillMaxSize()) {
-        SingleInputExample() // child 1
+        Text("Kayıt Ol Sayfasına Git")
+        AddToDo(onAdd = {text -> toDoList.add(text)}) // child 1
         ToDoList(toDoList, onDelete = {i -> toDoList.removeAt(i)}) // child 2
     }
 }
@@ -57,7 +68,7 @@ fun MyAppStart(modifier: Modifier)
 
 // State aynı
 @Composable
-fun SingleInputExample() {
+fun AddToDo(onAdd: (String) -> Unit) {
     var text = remember { mutableStateOf("abc") }
 
     Column() {
@@ -68,6 +79,8 @@ fun SingleInputExample() {
         )
         Button(
             onClick = {
+                onAdd(text.value)
+                text.value = ""
             }
         ) {
             Text("Tıkla")
