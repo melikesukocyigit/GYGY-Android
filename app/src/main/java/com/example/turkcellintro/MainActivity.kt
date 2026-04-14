@@ -27,9 +27,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController;
+import com.example.turkcellintro.viewmodel.ToDoListViewModel
 
 // Burada ekran tanımlarını yap.
 sealed class Screen(val route: String) {
@@ -37,6 +39,7 @@ sealed class Screen(val route: String) {
     data object Homepage: Screen("homepage")
 }
 
+// Telefon çevirildiği an => Yeniden başlatılır.
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,31 +57,26 @@ fun MyNavigatableApp(modifier: Modifier) {
     val navController = rememberNavController()
     // Magic String
     Column() {
-        NavHost(navController=navController, startDestination = Screen.Register.route){
+        NavHost(navController=navController, startDestination = Screen.Homepage.route){
             composable(Screen.Register.route) { RegisterScreen(modifier, navController) }
             composable(Screen.Homepage.route) { Homepage(modifier) }
         }
     }
-
 }
 
 @Composable
 fun Homepage(modifier: Modifier)
 {
-    // State'i tanımla ki..
-    // ikisi de burayı okuyabilsin-değiştirebilsin..
-    var toDoList = remember { mutableStateListOf("Veri 1", "Veri 2","Veri 3") }
+    // View -> ViewModel'i çağırır -> Dependency Injection
+    val viewModel: ToDoListViewModel = viewModel();
 
-
-    Column(modifier = modifier.fillMaxSize()) {
-        Text("Kayıt Ol Sayfasına Git")
-        AddToDo(onAdd = {text -> toDoList.add(text)}) // child 1
-        ToDoList(toDoList, onDelete = {i -> toDoList.removeAt(i)}) // child 2
+    Column(modifier= modifier.fillMaxSize()) {
+        Text("To Do List")
+        AddToDo(onAdd = {text -> viewModel.addToDo(text)})
+        ToDoList(viewModel.toDoList, onDelete = {i->viewModel.deleteToDo(i)})
     }
-}
-// State Hoisting -> State'i child(lar)dan alıp parent'a taşımak.
 
-// State aynı
+}
 @Composable
 fun AddToDo(onAdd: (String) -> Unit) {
     var text = remember { mutableStateOf("abc") }
