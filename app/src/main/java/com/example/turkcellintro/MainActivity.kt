@@ -22,6 +22,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,7 +33,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController;
+import com.example.turkcellintro.model.Todo
 import com.example.turkcellintro.viewmodel.ToDoListViewModel
+import io.github.jan.supabase.createSupabaseClient
 
 // Burada ekran tanımlarını yap.
 sealed class Screen(val route: String) {
@@ -41,6 +45,19 @@ sealed class Screen(val route: String) {
 
 // Telefon çevirildiği an => Yeniden başlatılır.
 class MainActivity : ComponentActivity() {
+    val supabaseClient = createSupabaseClient(
+        supabaseUrl = "",
+        supabaseKey = ""
+    ) {
+        //install(plugin = Postgrest=
+    }
+
+
+
+
+
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -67,16 +84,27 @@ fun MyNavigatableApp(modifier: Modifier) {
 @Composable
 fun Homepage(modifier: Modifier)
 {
-    // View -> ViewModel'i çağırır -> Dependency Injection
-    val viewModel: ToDoListViewModel = viewModel();
+    val todoViewModel: ToDoListViewModel = viewModel()
 
-    Column(modifier= modifier.fillMaxSize()) {
-        Text("To Do List")
-        AddToDo(onAdd = {text -> viewModel.addToDo(text)})
-        ToDoList(viewModel.toDoList, onDelete = {i->viewModel.deleteToDo(i)})
+    val todos by todoViewModel.todos.collectAsState()
+    val isLoading by todoViewModel.isLoading.collectAsState()
+    val error by todoViewModel.error.collectAsState()
+
+    Column(modifier= modifier.fillMaxSize()){
+        when {
+            isLoading -> {Text("Yükleniyor")}
+            error != null -> {Text("Hata aldı: $error")}
+            else -> {
+                ToDoList(todos) { }
+            }
+        }
     }
-
 }
+
+
+
+
+
 @Composable
 fun AddToDo(onAdd: (String) -> Unit) {
     var text = remember { mutableStateOf("abc") }
@@ -99,7 +127,7 @@ fun AddToDo(onAdd: (String) -> Unit) {
 }
 // State aynı
 @Composable
-fun ToDoList(toDoList: List<String>, onDelete: (Int) -> Unit) {
+fun ToDoList(toDoList: List<Todo>, onDelete: (Int) -> Unit) {
 
     LazyColumn(modifier = Modifier.fillMaxSize())
     {
@@ -108,7 +136,9 @@ fun ToDoList(toDoList: List<String>, onDelete: (Int) -> Unit) {
             Row(modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically) {
-                Text(todo)
+                Text(todo.title)
+                Text(todo.completed.toString())
+                Text(todo.id.toString())
                 IconButton(onClick = {
                     onDelete(index)
                 }) {
