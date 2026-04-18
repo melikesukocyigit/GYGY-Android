@@ -1,7 +1,21 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
 }
+
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists())
+    {
+        load(localPropertiesFile.inputStream())
+    }
+}
+
+val supabaseUrl: String = localProperties.getProperty("supabase.url", "")
+val supabaseKey: String = localProperties.getProperty("supabase.key", "")
+
 
 android {
     namespace = "com.example.turkcellintro"
@@ -40,6 +54,7 @@ android {
 }
 
 dependencies {
+    // TODO: Move all of them to libs.versions.toml
     implementation("androidx.navigation:navigation-compose:2.9.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
 
@@ -48,6 +63,10 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
 
     implementation("io.github.jan-tennert.supabase:supabase-kt:3.2.4")
+    implementation("io.ktor:ktor-client-android:3.1.1")
+
+    implementation(libs.supabase.postgrest)
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -68,4 +87,5 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
 }
